@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Country Finder</title>
+		<style>
+			/* Write all necessery css here  */
+			#all_countries {
+				margin: auto;
+				width: 80%;
+				height: 80%;
+				border: red 1px solid;
+				display: grid;
+				grid-template-columns: repeat(3, 30%);
+				/* grid-gap: 1rem; */
+			}
+			#card {
+				width: 90%;
+				border: red 1px solid;
+				padding: 5%;
+				margin: 0.5rem 1rem;
+			}
+			#card > img {
+				width: 80%;
+				margin: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<select id="sort_population">
+			<option value="">Sort By Population</option>
+			<option value="asc">ASC</option>
+			<option value="desc">DESC</option>
+		</select>
+		<select id="filter_region">
+			<option value="">Filter By Region</option>
+			<option value="Africa">Africa</option>
+			<option value="Americas">Americas</option>
+			<option value="Asia">Asia</option>
+			<option value="Europe">Europe</option>
+			<option value="Oceania">Oceania</option>
+		</select>
+		<div id="all_countries">
+			<!-- Append Country Cards here  -->
+		</div>
+	</body>
+	<script>
+		// Write all necessery JS here
+		let fin;
+		let opt = [];
+		async function fetchCountries() {
+			const res = await fetch('https://restcountries.com/v3.1/all');
+			const data = await res.json();
+			fin = data;
+			displayCountries(fin);
+		}
+		fetchCountries();
+		const sortOpt = document.querySelector('#sort_population');
+		const filOpt = document.querySelector('#filter_region');
+		sortOpt.addEventListener('change', () => {
+			opt[0] = sortOpt.value;
+			change();
+		});
+		filOpt.addEventListener('change', () => {
+			fetchCountries();
+			opt[1] = filOpt.value;
+			change();
+		});
+		function displayCountries(data) {
+			const countriesDiv = document.querySelector('#all_countries');
+			countriesDiv.innerHTML = '';
+			data.map(country => {
+				const card = document.createElement('div');
+				card.setAttribute('id', 'card');
+				const name = document.createElement('h3');
+				name.innerText = country.name.common;
+				const image = document.createElement('img');
+				image.src = country.flags.png;
+				const pop = document.createElement('p');
+				pop.innerText = `Population: ${country.population}`;
+				const reg = document.createElement('p');
+				reg.innerText = `Region: ${country.region}`;
+				const cap = document.createElement('p');
+				cap.innerText = `Capital: ${country.capital}`;
+				card.append(image, name, pop, reg, cap);
+				countriesDiv.append(card);
+			});
+		}
+		function sortCoun(q) {
+			if (q === 'asc') {
+				fin = fin.sort((a, b) => a.population - b.population);
+			} else {
+				fin = fin.sort((a, b) => b.population - a.population);
+			}
+		}
+		function change() {
+			if (opt.length === 1) {
+				sortCoun(opt[0]);
+				displayCountries(fin);
+			} else {
+				sortCoun(opt[0]);
+				fin = fin.filter(coun => coun.region === opt[1]);
+				displayCountries(fin);
+			}
+		}
+	</script>
+</html>
